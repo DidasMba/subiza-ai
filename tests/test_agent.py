@@ -85,3 +85,28 @@ def test_only_recent_history_reaches_the_prompt():
     SupportAgent(FakeStore([HOURS]), model).answer("When do you open?", history)
     assert "old question 0\n" not in model.prompts[0]
     assert "old question 19" in model.prompts[0]
+
+
+def test_structured_handoff_works_in_any_language():
+    reply = '{"reply": "Tafadhali zungumza na mfamasia wetu wa zamu.", "handoff": true}'
+    result = SupportAgent(FakeStore([HOURS]), FakeModel(reply=reply)).answer(
+        "Nimpe mtoto wangu vidonge vingapi vya paracetamol?"
+    )
+    assert result.reply == "Tafadhali zungumza na mfamasia wetu wa zamu."
+    assert result.handed_off is True
+
+
+def test_structured_answer_is_not_a_handoff():
+    reply = '{"reply": "Le dimanche, nous ouvrons de 9 h à 14 h.", "handoff": false}'
+    result = SupportAgent(FakeStore([HOURS]), FakeModel(reply=reply)).answer(
+        "Vous êtes ouverts le dimanche ?"
+    )
+    assert result.reply == "Le dimanche, nous ouvrons de 9 h à 14 h."
+    assert result.handed_off is False
+
+
+def test_empty_structured_reply_gives_busy_reply():
+    reply = '{"reply": "  ", "handoff": false}'
+    result = SupportAgent(FakeStore([HOURS]), FakeModel(reply=reply)).answer("When do you open?")
+    assert result.reply == BUSY_REPLY
+    assert result.handed_off is True

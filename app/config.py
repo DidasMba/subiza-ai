@@ -67,10 +67,21 @@ MAX_HISTORY_TURNS = _env_int("MAX_HISTORY_TURNS", 6)  # earlier turns sent to Ge
 
 LOG_LEVEL = _env_str("LOG_LEVEL", "INFO")
 
-# Quick-start questions shown as chips in the chat widget
-SUGGESTED_QUESTIONS = [
+# Language of the fixed texts (chat widget, "busy" and "not sure" replies):
+# "en" or "fr". Gemini itself always answers in the customer's language.
+UI_LANGUAGE = _env_str("UI_LANGUAGE", "en")
+
+# Quick-start questions shown as chips in the chat widget.
+# Override in the business's own language, separated by "|", e.g.
+# SUGGESTED_QUESTIONS="Vous êtes ouverts le dimanche ?|Vous livrez à domicile ?"
+_DEFAULT_QUESTIONS = (
     "What time do you open?",
     "Do you deliver?",
     "Which payment methods do you accept?",
     "Do you accept insurance?",
+)
+SUGGESTED_QUESTIONS = [
+    q.strip()
+    for q in _env_str("SUGGESTED_QUESTIONS", "|".join(_DEFAULT_QUESTIONS)).split("|")
+    if q.strip()
 ]
