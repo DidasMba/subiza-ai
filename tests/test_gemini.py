@@ -5,6 +5,7 @@ from types import SimpleNamespace
 import pytest
 
 from app import config, gemini
+from app.schemas import AgentReply
 
 
 class FakeModels:
@@ -95,6 +96,8 @@ def test_chat_sends_prompt_without_retries():
     assert (model, contents) == ("gemini-3.6-flash", "Hi")
     assert chat_config.http_options.retry_options.attempts == gemini.NO_RETRY
     assert chat_config.thinking_config.thinking_level == "LOW"
+    assert chat_config.response_mime_type == "application/json"
+    assert chat_config.response_schema is AgentReply
 
 
 def test_thinking_level_can_be_turned_off(monkeypatch):

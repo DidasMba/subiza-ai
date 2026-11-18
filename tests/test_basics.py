@@ -1,13 +1,14 @@
 """Checks that run without a Gemini API key."""
 
-from app.config import KB_PATH
+from pathlib import Path
+
 from app.handoff import needs_human
 from app.prompts import build_prompt
 from app.rag import load_chunks
 
 
 def test_chunks_split_on_h3_headings():
-    chunks = load_chunks(KB_PATH)
+    chunks = load_chunks(Path("app/knowledge/business_faq.md"))
     titles = [c["title"] for c in chunks]
     assert "Business Hours" in titles
     assert "Payment Methods" in titles

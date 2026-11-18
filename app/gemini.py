@@ -19,6 +19,7 @@ from google import genai
 from google.genai import types
 
 from app import config
+from app.schemas import AgentReply
 
 logger = logging.getLogger(__name__)
 
@@ -107,6 +108,9 @@ class GeminiChat:
             config=types.GenerateContentConfig(
                 http_options=http_options(NO_RETRY),
                 thinking_config=thinking_config(),
+                # Structured output: the reply plus a handoff flag, in any language.
+                response_mime_type="application/json",
+                response_schema=AgentReply,
             ),
         )
         if not response.text:

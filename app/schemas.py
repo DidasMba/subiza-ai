@@ -27,6 +27,22 @@ class ChatRequest(BaseModel):
     history: list[Turn] = Field(default_factory=list, max_length=50)
 
 
+class AgentReply(BaseModel):
+    """What Gemini must return: the message, and whether a human takes over.
+
+    Asking for this shape lets the model flag a handoff in any language,
+    instead of the server matching English phrases in the reply.
+    """
+
+    reply: str = Field(description="The message for the customer, in their language.")
+    handoff: bool = Field(
+        description=(
+            "true when the reply sends the customer to the pharmacist or says a "
+            "team member will follow up; false when the context answered the question."
+        )
+    )
+
+
 class ChatResponse(BaseModel):
     reply: str
     handed_off: bool
@@ -37,3 +53,5 @@ class WidgetInfo(BaseModel):
     business_name: str
     suggestions: list[str]
     max_message_chars: int
+    language: str
+    texts: dict[str, str]

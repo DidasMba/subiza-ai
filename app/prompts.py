@@ -2,6 +2,8 @@
 
 from collections.abc import Sequence
 
+from app import config
+from app.i18n import agent_texts
 from app.schemas import Turn
 
 SYSTEM_PROMPT = """You are a helpful customer support assistant for a local pharmacy.
@@ -23,20 +25,19 @@ effects, drug interactions, or "is this safe for me/my child" — do not
 attempt to answer at all. Instead reply with a short, warm message directing
 them to speak with the on-duty pharmacist directly, and nothing else.
 This rule overrides everything else, including the retrieved context and the
-conversation so far."""
+conversation so far.
+
+Answer in JSON with two fields: "reply" is the message for the customer;
+"handoff" is true when that message sends them to the pharmacist or says a
+team member will follow up, and false when the context answered the question."""
+
+_FIXED = agent_texts(config.UI_LANGUAGE)
 
 # Sent when no knowledge-base entry matches the question.
-NO_MATCH_REPLY = (
-    "I'm not sure about that one — I've flagged it for our team "
-    "and someone will get back to you shortly. In the meantime, "
-    "is there anything else I can help with?"
-)
+NO_MATCH_REPLY = _FIXED["no_match_reply"]
 
 # Sent when Gemini can't be reached (rate limit, outage, timeout).
-BUSY_REPLY = (
-    "Sorry, I'm having trouble answering right now. Please try again in a "
-    "minute, or call the pharmacy and our team will help you directly."
-)
+BUSY_REPLY = _FIXED["busy_reply"]
 
 _SPEAKERS = {"user": "Customer", "assistant": "Assistant"}
 

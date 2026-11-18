@@ -9,7 +9,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-from app import config, gemini
+from app import config, gemini, i18n
 from app.agent import create_agent
 from app.schemas import ChatRequest, ChatResponse, WidgetInfo
 
@@ -60,6 +60,8 @@ def info() -> WidgetInfo:
         business_name=config.BUSINESS_NAME,
         suggestions=config.SUGGESTED_QUESTIONS,
         max_message_chars=config.MAX_MESSAGE_CHARS,
+        language=i18n.language(config.UI_LANGUAGE),
+        texts=i18n.widget_texts(config.UI_LANGUAGE),
     )
 
 

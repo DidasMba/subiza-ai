@@ -311,7 +311,7 @@
       </div>
       <div class="title">
         <h1 id="business-name">Pharmacy Support</h1>
-        <div class="status">Online · AI assistant</div>
+        <div class="status" id="status">Online · AI assistant</div>
       </div>
       <button class="icon-btn" id="new-chat" type="button" aria-label="Start a new conversation" title="New conversation">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
@@ -325,7 +325,7 @@
     <section class="messages" id="messages" role="log" aria-live="polite" aria-relevant="additions"></section>
 
     <form class="composer" id="composer" autocomplete="off">
-      <label for="input" class="sr-only">Your message</label>
+      <label for="input" class="sr-only" id="input-label">Your message</label>
       <div class="input-wrap">
         <textarea id="input" rows="1" placeholder="Ask about hours, delivery, payments…" enterkeyhint="send"></textarea>
         <button class="send" id="send" type="submit" aria-label="Send message" disabled>
@@ -333,7 +333,7 @@
         </button>
       </div>
       <div class="footnote">
-        <span>AI answers can be wrong. For health questions, please ask our pharmacist.</span>
+        <span id="disclaimer">AI answers can be wrong. For health questions, please ask our pharmacist.</span>
         <span class="counter" id="counter" aria-live="polite"></span>
       </div>
     </form>
@@ -345,7 +345,23 @@
 
   const STORAGE_KEY = 'chat-history';
   const HISTORY_SENT = 12; // earlier turns sent with each question
-  const GREETING = "Hi! 👋 I can help with opening hours, location, delivery, payments and our services. What would you like to know?";
+  // English defaults; /info replaces them with the business's language (UI_LANGUAGE).
+  const DEFAULT_TEXTS = {
+    greeting: "Hi! 👋 I can help with opening hours, location, delivery, payments and our services. What would you like to know?",
+    status: 'Online · AI assistant',
+    placeholder: 'Ask about hours, delivery, payments…',
+    disclaimer: 'AI answers can be wrong. For health questions, please ask our pharmacist.',
+    sources_label: 'Based on',
+    handoff_notice: 'A member of our team will follow up. For anything urgent, please call the pharmacy.',
+    typing: 'Assistant is typing',
+    server_error: "Couldn't reach the server.",
+    retry: 'Try again',
+    new_chat: 'New conversation',
+    send: 'Send message',
+    your_message: 'Your message',
+    dark_mode: 'Dark mode',
+    title_suffix: 'Support',
+  };
 
   const $ = (id) => document.getElementById(id);
   const messagesEl = $('messages');
@@ -360,6 +376,8 @@
     suggestions: [],
     maxChars: 1000,
     busy: false,
+    lang: undefined,      // browser default until /info names the language
+    texts: DEFAULT_TEXTS,
   };
 
   // ---------- Theme ----------
@@ -433,7 +451,7 @@
   }
 
   function formatTime(timestamp) {
-    return new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return new Date(timestamp).toLocaleTimeString(state.lang, { hour: '2-digit', minute: '2-digit' });
   }
 
   function botRow() {
@@ -460,16 +478,17 @@
     stack.append(el('div', 'bubble', renderMarkdown(turn.content)));
     if (turn.sources && turn.sources.length) {
       const sources = el('div', 'sources');
-      sources.append(Object.assign(el('span'), { textContent: 'Based on' }));
+      sources.append(Object.assign(el('span'), { textContent: state.texts.sources_label }));
       for (const title of turn.sources) {
         sources.append(Object.assign(el('span', 'source'), { textContent: title }));
       }
       stack.append(sources);
     }
     if (turn.handedOff) {
-      stack.append(el('div', 'handoff',
-        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>' +
-        '<span>A member of our team will follow up. For anything urgent, please call the pharmacy.</span>'));
+      const notice = el('div', 'handoff',
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>');
+      notice.append(Object.assign(el('span'), { textContent: state.texts.handoff_notice }));
+      stack.append(notice);
     }
     if (turn.at) stack.append(Object.assign(el('div', 'meta'), { textContent: formatTime(turn.at) }));
     return row;
@@ -489,7 +508,7 @@
   }
 
   function renderAll() {
-    messagesEl.replaceChildren(renderTurn({ role: 'assistant', content: GREETING }));
+    messagesEl.replaceChildren(renderTurn({ role: 'assistant', content: state.texts.greeting }));
     if (!state.turns.length && state.suggestions.length) messagesEl.append(renderSuggestions());
     for (const turn of state.turns) messagesEl.append(renderTurn(turn));
     scrollToBottom();
@@ -503,7 +522,7 @@
     const { row, stack } = botRow();
     row.id = 'typing';
     stack.append(el('div', 'bubble typing', '<i></i><i></i><i></i>'));
-    row.setAttribute('aria-label', 'Assistant is typing');
+    row.setAttribute('aria-label', state.texts.typing);
     messagesEl.append(row);
     scrollToBottom();
   }
@@ -514,10 +533,10 @@
 
   function showError(question) {
     const row = el('div', 'row bot error-row');
-    row.append(Object.assign(el('span'), { textContent: "Couldn't reach the server." }));
+    row.append(Object.assign(el('span'), { textContent: state.texts.server_error }));
     const retry = el('button', 'link-btn');
     retry.type = 'button';
-    retry.textContent = 'Try again';
+    retry.textContent = state.texts.retry;
     retry.addEventListener('click', () => { row.remove(); send(question); });
     row.append(retry);
     messagesEl.append(row);
@@ -607,13 +626,30 @@
     }
   }
 
+  function applyTexts(lang, texts) {
+    state.lang = lang;
+    state.texts = { ...DEFAULT_TEXTS, ...texts };
+    const t = state.texts;
+    document.documentElement.lang = lang;
+    $('status').textContent = t.status;
+    $('disclaimer').textContent = t.disclaimer;
+    $('input-label').textContent = t.your_message;
+    inputEl.placeholder = t.placeholder;
+    sendBtn.setAttribute('aria-label', t.send);
+    for (const attr of ['aria-label', 'title']) {
+      $('new-chat').setAttribute(attr, t.new_chat);
+      themeToggle.setAttribute(attr, t.dark_mode);
+    }
+  }
+
   async function loadInfo() {
     try {
       const res = await fetch('/info');
       if (!res.ok) return;
       const info = await res.json();
+      if (info.texts) applyTexts(info.language, info.texts);
       $('business-name').textContent = info.business_name;
-      document.title = `${info.business_name} · Support`;
+      document.title = `${info.business_name} · ${state.texts.title_suffix}`;
       state.suggestions = info.suggestions || [];
       state.maxChars = info.max_message_chars || state.maxChars;
       if (!state.busy) renderAll();

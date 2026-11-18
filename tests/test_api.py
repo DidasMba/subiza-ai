@@ -50,6 +50,8 @@ def test_info_and_health():
     info = http.get("/info").json()
     assert info["business_name"] == config.BUSINESS_NAME
     assert info["suggestions"]
+    assert info["language"] in ("en", "fr")
+    assert info["texts"]["greeting"]
 
 
 def test_widget_is_served():

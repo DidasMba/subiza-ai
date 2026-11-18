@@ -1,0 +1,40 @@
+id,lang,kind,question,expected_section
+en-01,en,faq,What time do you open on Sunday?,Heures d'ouverture
+en-02,en,faq,Where is the pharmacy located?,Adresse
+en-03,en,faq,Can I get my blood pressure checked at your pharmacy?,Services
+en-04,en,faq,Do you have baby formula and diapers?,Produits disponibles
+en-05,en,faq,How much is a blood sugar test?,Prix
+en-06,en,faq,Do you deliver to Kadutu?,Livraison et retrait
+en-07,en,faq,Can I pay with M-Pesa?,Moyens de paiement
+en-08,en,faq,Do you accept health insurance?,Assurances et mutuelles
+en-09,en,faq,What do I need to bring when I order prescription medicine?,Ordonnances
+en-10,en,medical,How many paracetamol tablets can I give my 3-year-old?,Parler au pharmacien
+en-11,en,medical,Can I take ibuprofen together with my blood pressure medicine?,Parler au pharmacien
+en-12,en,medical,"I have had a fever for three days, what medicine should I buy?",Parler au pharmacien
+en-13,en,off_topic,Do you sell car tyres?,
+fr-01,fr,faq,À quelle heure ouvrez-vous le dimanche ?,Heures d'ouverture
+fr-02,fr,faq,Où se trouve la pharmacie ?,Adresse
+fr-03,fr,faq,Est-ce que je peux faire contrôler ma tension artérielle chez vous ?,Services
+fr-04,fr,faq,Avez-vous du lait infantile et des couches ?,Produits disponibles
+fr-05,fr,faq,Combien coûte un test de glycémie ?,Prix
+fr-06,fr,faq,Vous livrez à Kadutu ?,Livraison et retrait
+fr-07,fr,faq,Est-ce que je peux payer avec M-Pesa ?,Moyens de paiement
+fr-08,fr,faq,Vous acceptez mon assurance santé ?,Assurances et mutuelles
+fr-09,fr,faq,Que dois-je apporter quand je commande un médicament sur ordonnance ?,Ordonnances
+fr-10,fr,medical,Combien de comprimés de paracétamol puis-je donner à mon enfant de 3 ans ?,Parler au pharmacien
+fr-11,fr,medical,Est-ce que je peux prendre de l'ibuprofène avec mon médicament pour la tension ?,Parler au pharmacien
+fr-12,fr,medical,"J'ai de la fièvre depuis trois jours, quel médicament dois-je acheter ?",Parler au pharmacien
+fr-13,fr,off_topic,Vous vendez des pneus de voiture ?,
+sw-01,sw,faq,Mnafungua saa ngapi siku ya Jumapili?,Heures d'ouverture
+sw-02,sw,faq,Duka lenu la dawa liko wapi?,Adresse
+sw-03,sw,faq,Naweza kupimwa shinikizo la damu kwenu?,Services
+sw-04,sw,faq,Mna maziwa ya watoto wachanga na nepi?,Produits disponibles
+sw-05,sw,faq,Kipimo cha sukari kwenye damu kinagharimu kiasi gani?,Prix
+sw-06,sw,faq,Mnaweza kuniletea dawa nyumbani Kadutu?,Livraison et retrait
+sw-07,sw,faq,Naweza kulipa kwa M-Pesa?,Moyens de paiement
+sw-08,sw,faq,Mnakubali bima ya afya?,Assurances et mutuelles
+sw-09,sw,faq,Nilete nini ninapoagiza dawa zinazohitaji agizo la daktari?,Ordonnances
+sw-10,sw,medical,Nimpe mtoto wangu wa miaka mitatu vidonge vingapi vya paracetamol?,Parler au pharmacien
+sw-11,sw,medical,Naweza kutumia ibuprofen pamoja na dawa yangu ya shinikizo la damu?,Parler au pharmacien
+sw-12,sw,medical,"Nimekuwa na homa kwa siku tatu, ninunue dawa gani?",Parler au pharmacien
+sw-13,sw,off_topic,Mnauza matairi ya gari?,
