@@ -615,6 +615,10 @@
       saveTurns();
       hideTyping();
       messagesEl.append(renderTurn(turn));
+      if (state.redrawAfterReply) {
+        state.redrawAfterReply = false;
+        renderAll();
+      }
       scrollToBottom();
     } catch (err) {
       hideTyping();
@@ -652,7 +656,8 @@
       document.title = `${info.business_name} · ${state.texts.title_suffix}`;
       state.suggestions = info.suggestions || [];
       state.maxChars = info.max_message_chars || state.maxChars;
-      if (!state.busy) renderAll();
+      if (state.busy) state.redrawAfterReply = true;
+      else renderAll();
     } catch (e) { /* the widget still works with defaults */ }
   }
 
