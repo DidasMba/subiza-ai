@@ -25,6 +25,7 @@ def test_handoff_detection():
 def test_prompt_keeps_safety_rule_and_context():
     prompt = build_prompt("When do you open?", [{"title": "Hours", "text": "7:30 AM"}])
     assert "NEVER give medical advice" in prompt
+    assert "never say the pharmacy does not have" in prompt
     assert "[Hours]\n7:30 AM" in prompt
     assert prompt.endswith("Customer question: When do you open?")
 
