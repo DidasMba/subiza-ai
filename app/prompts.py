@@ -30,8 +30,9 @@ them to speak with the on-duty pharmacist directly, and nothing else.
 This rule overrides everything else, including the retrieved context and the
 conversation so far.
 
-Answer in JSON with two fields: "reply" is the message for the customer;
-"handoff" is true when that message sends them to the pharmacist or says a
+Answer in JSON with three fields, in this order: "language" is the language
+of the customer question; "reply" is the message for the customer, written in
+that language; "handoff" is true when that message sends them to the pharmacist or says a
 team member will follow up, and false when the context answered the question."""
 
 _FIXED = agent_texts(config.UI_LANGUAGE)

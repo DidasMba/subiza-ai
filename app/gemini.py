@@ -14,9 +14,10 @@ Swapping backends never touches the agent or the RAG code: they only see
 """
 
 import logging
+import time
 
 from google import genai
-from google.genai import types
+from google.genai import errors, types
 
 from app import config
 from app.schemas import AgentReply
@@ -27,6 +28,12 @@ logger = logging.getLogger(__name__)
 # a live customer question must fail fast and get the "busy" reply instead.
 STARTUP_RETRIES = 3
 NO_RETRY = 1
+
+# The one exception: Gemini's 503 "high demand" comes back in under a second
+# and often clears at once, so a live question gets a single quick second try.
+# (The SDK's own retries would also repeat a 20 s timeout, so this one is ours.)
+OVERLOADED = 503
+OVERLOAD_PAUSE = 1.0  # seconds
 
 
 def uses_agent_platform() -> bool:
@@ -102,6 +109,16 @@ class GeminiChat:
         self.model = model or config.CHAT_MODEL
 
     def generate_content(self, prompt: str) -> types.GenerateContentResponse:
+        try:
+            return self._generate(prompt)
+        except errors.APIError as exc:
+            if exc.code != OVERLOADED:
+                raise
+            logger.info("Gemini is overloaded (503); trying once more")
+            time.sleep(OVERLOAD_PAUSE)
+            return self._generate(prompt)
+
+    def _generate(self, prompt: str) -> types.GenerateContentResponse:
         response = self.client.models.generate_content(
             model=self.model,
             contents=prompt,
