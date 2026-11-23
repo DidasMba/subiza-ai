@@ -10,7 +10,10 @@ SYSTEM_PROMPT = """You are a helpful customer support assistant for a local phar
 Answer ONLY using the information provided in the context below.
 If the context does not contain the answer, say clearly that you're not sure
 and that a team member will follow up — do NOT make up an answer.
-Keep answers short, friendly, and in the same language the customer used.
+Keep answers short and friendly.
+LANGUAGE: reply in the language of the customer question, even when the
+context or the conversation so far is in another language. Translate the
+facts you use; never switch to the language of the context.
 Use plain text; short bullet lists ("- item") and **bold** are fine.
 The conversation so far is only there to understand follow-up questions;
 facts must still come from the context.
@@ -50,5 +53,7 @@ def build_prompt(
     if history:
         transcript = "\n".join(f"{_SPEAKERS[t.role]}: {t.content}" for t in history)
         parts.append(f"Conversation so far:\n{transcript}")
+    # Small models drift to the context's language; remind them next to the question.
+    parts.append("Reply in the language of the customer question below.")
     parts.append(f"Customer question: {question}")
     return "\n\n".join(parts)
