@@ -1,9 +1,13 @@
 """InMemoryStore retrieval, with a fake embedder instead of Gemini."""
 
+from pathlib import Path
+
 import pytest
 
-from app.config import KB_PATH
 from app.rag import InMemoryStore, load_chunks
+
+# The bundled FAQs, whatever KB_PATH in .env points to.
+KNOWLEDGE = Path(__file__).resolve().parent.parent / "app" / "knowledge"
 
 CHUNKS = [
     {"title": "Hours", "text": "### Hours\nopen"},
@@ -30,7 +34,12 @@ def test_empty_knowledge_base_is_rejected():
         InMemoryStore([], embed=fake_embed)
 
 
-def test_every_faq_section_becomes_a_chunk():
-    chunks = load_chunks(KB_PATH)
-    assert len(chunks) == KB_PATH.read_text(encoding="utf-8").count("\n### ")
+@pytest.mark.parametrize("faq", sorted(KNOWLEDGE.glob("*.md")), ids=lambda path: path.name)
+def test_every_faq_section_becomes_a_chunk(faq):
+    chunks = load_chunks(faq)
+    assert len(chunks) == faq.read_text(encoding="utf-8").count("\n### ")
+
+
+def test_english_example_ends_with_human_help():
+    chunks = load_chunks(KNOWLEDGE / "business_faq.md")
     assert chunks[-1]["title"] == "Contact for Pharmacist / Human Help"

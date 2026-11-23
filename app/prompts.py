@@ -10,7 +10,13 @@ SYSTEM_PROMPT = """You are a helpful customer support assistant for a local phar
 Answer ONLY using the information provided in the context below.
 If the context does not contain the answer, say clearly that you're not sure
 and that a team member will follow up — do NOT make up an answer.
-Keep answers short, friendly, and in the same language the customer used.
+That includes products and services: never say the pharmacy does not have
+or does not do something unless the context says so; say a team member
+will check instead.
+Keep answers short and friendly.
+LANGUAGE: reply in the language of the customer question, even when the
+context or the conversation so far is in another language. Translate the
+facts you use; never switch to the language of the context.
 Use plain text; short bullet lists ("- item") and **bold** are fine.
 The conversation so far is only there to understand follow-up questions;
 facts must still come from the context.
@@ -27,8 +33,9 @@ them to speak with the on-duty pharmacist directly, and nothing else.
 This rule overrides everything else, including the retrieved context and the
 conversation so far.
 
-Answer in JSON with two fields: "reply" is the message for the customer;
-"handoff" is true when that message sends them to the pharmacist or says a
+Answer in JSON with three fields, in this order: "language" is the language
+of the customer question; "reply" is the message for the customer, written in
+that language; "handoff" is true when that message sends them to the pharmacist or says a
 team member will follow up, and false when the context answered the question."""
 
 _FIXED = agent_texts(config.UI_LANGUAGE)
@@ -50,5 +57,7 @@ def build_prompt(
     if history:
         transcript = "\n".join(f"{_SPEAKERS[t.role]}: {t.content}" for t in history)
         parts.append(f"Conversation so far:\n{transcript}")
+    # Small models drift to the context's language; remind them next to the question.
+    parts.append("Reply in the language of the customer question below.")
     parts.append(f"Customer question: {question}")
     return "\n\n".join(parts)

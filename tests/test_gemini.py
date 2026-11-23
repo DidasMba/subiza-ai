@@ -3,6 +3,7 @@
 from types import SimpleNamespace
 
 import pytest
+from google.genai import errors
 
 from app import config, gemini
 from app.schemas import AgentReply
@@ -108,3 +109,40 @@ def test_thinking_level_can_be_turned_off(monkeypatch):
 def test_blocked_or_empty_reply_raises():
     with pytest.raises(ValueError):
         gemini.GeminiChat(fake_client(reply=None)).generate_content("Hi")
+
+
+def test_reply_schema_names_the_language_before_the_reply():
+    assert list(AgentReply.model_fields) == ["language", "reply", "handoff"]
+
+
+class FlakyModels(FakeModels):
+    """Fails with the given HTTP codes first, then answers."""
+
+    def __init__(self, *codes):
+        super().__init__()
+        self.codes = list(codes)
+
+    def generate_content(self, *, model, contents, config):
+        self.generate_calls.append((model, contents, config))
+        if self.codes:
+            code = self.codes.pop(0)
+            raise errors.ServerError(code, {"error": {"code": code, "message": "x"}})
+        return SimpleNamespace(text=self.reply)
+
+
+def test_overloaded_gemini_gets_one_quick_second_try(monkeypatch):
+    monkeypatch.setattr(gemini, "OVERLOAD_PAUSE", 0)
+    models = FlakyModels(503)
+    chat = gemini.GeminiChat(SimpleNamespace(models=models), model="gemini-3.5-flash-lite")
+    assert chat.generate_content("Hi").text == "We open at 7:30 AM."
+    assert len(models.generate_calls) == 2
+
+
+def test_overloaded_twice_and_timeouts_are_not_retried_again(monkeypatch):
+    monkeypatch.setattr(gemini, "OVERLOAD_PAUSE", 0)
+    for codes, calls in (((503, 503), 2), ((504,), 1)):
+        models = FlakyModels(*codes)
+        chat = gemini.GeminiChat(SimpleNamespace(models=models))
+        with pytest.raises(errors.ServerError):
+            chat.generate_content("Hi")
+        assert len(models.generate_calls) == calls

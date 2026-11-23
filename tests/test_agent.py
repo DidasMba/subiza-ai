@@ -88,7 +88,10 @@ def test_only_recent_history_reaches_the_prompt():
 
 
 def test_structured_handoff_works_in_any_language():
-    reply = '{"reply": "Tafadhali zungumza na mfamasia wetu wa zamu.", "handoff": true}'
+    reply = (
+        '{"language": "Kiswahili", '
+        '"reply": "Tafadhali zungumza na mfamasia wetu wa zamu.", "handoff": true}'
+    )
     result = SupportAgent(FakeStore([HOURS]), FakeModel(reply=reply)).answer(
         "Nimpe mtoto wangu vidonge vingapi vya paracetamol?"
     )
@@ -97,7 +100,10 @@ def test_structured_handoff_works_in_any_language():
 
 
 def test_structured_answer_is_not_a_handoff():
-    reply = '{"reply": "Le dimanche, nous ouvrons de 9 h à 14 h.", "handoff": false}'
+    reply = (
+        '{"language": "Français", '
+        '"reply": "Le dimanche, nous ouvrons de 9 h à 14 h.", "handoff": false}'
+    )
     result = SupportAgent(FakeStore([HOURS]), FakeModel(reply=reply)).answer(
         "Vous êtes ouverts le dimanche ?"
     )
@@ -106,7 +112,7 @@ def test_structured_answer_is_not_a_handoff():
 
 
 def test_empty_structured_reply_gives_busy_reply():
-    reply = '{"reply": "  ", "handoff": false}'
+    reply = '{"language": "English", "reply": "  ", "handoff": false}'
     result = SupportAgent(FakeStore([HOURS]), FakeModel(reply=reply)).answer("When do you open?")
     assert result.reply == BUSY_REPLY
     assert result.handed_off is True

@@ -34,7 +34,12 @@ class AgentReply(BaseModel):
     instead of the server matching English phrases in the reply.
     """
 
-    reply: str = Field(description="The message for the customer, in their language.")
+    # Field order is the order Gemini writes them in: naming the language first
+    # keeps a small model from drifting to the language of the context.
+    language: str = Field(
+        description="The language of the customer question, e.g. English, Kiswahili, Français."
+    )
+    reply: str = Field(description="The message for the customer, written in that language.")
     handoff: bool = Field(
         description=(
             "true when the reply sends the customer to the pharmacist or says a "

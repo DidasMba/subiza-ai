@@ -25,5 +25,13 @@ def test_handoff_detection():
 def test_prompt_keeps_safety_rule_and_context():
     prompt = build_prompt("When do you open?", [{"title": "Hours", "text": "7:30 AM"}])
     assert "NEVER give medical advice" in prompt
+    assert "never say the pharmacy does not have" in prompt
     assert "[Hours]\n7:30 AM" in prompt
     assert prompt.endswith("Customer question: When do you open?")
+
+
+def test_prompt_asks_for_the_question_language_next_to_the_question():
+    prompt = build_prompt("Do you deliver?", [{"title": "Livraison", "text": "Nous livrons."}])
+    before, question = prompt.rsplit("\n\n", 1)
+    assert question == "Customer question: Do you deliver?"
+    assert before.endswith("Reply in the language of the customer question below.")
